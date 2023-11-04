@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+    <style>
+        html,body {
+            margin:0;
+            padding:0;
+        }
+        .hero {
+            width: 100%;
+            height:800px;
+            position: relative;
+            background: grey;
+        }
+        
+        .red { background:red; }
+        .green { background:green; }
+        .yellow { background:yellow; }
+        [data-fixed-section] .text {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate3d(-50%, -50%, 0);
+            text-align: center;
+            font-size: 40px;
+            height: 50px;
+        }
+    </style>
+    </head>
+    <body>
+    <div class="hero">
+        <div class="text">
+            Section 1
+        </div>
+    </div>
+    <div class="red" data-fixed-section data-duration="5">
+        <div class="text">
+            Section 1
+            <span>nan</span>
+        </div>
+    </div>
+    <div class="green" data-fixed-section data-duration="16">
+        <div class="text">
+            Section 2
+            <span>nan</span>
+        </div>
+    </div>
+    <div class="hero yellow">
+        <div class="text">
+            Footer
+        </div>
+    </div>
+    <script src='https://code.jquery.com/jquery-3.7.1.slim.js'></script>
+    <script src='../build/fixed-scroll.1.0.0.min.js'></script>
+    <script>
+
+    // Init fixedScroll
+    $('[data-fixed-section]').fixedScroll({
+        callback: function(index, percentage) {
+            console.log(index, percentage);
+        }
+    });
+    </script>
+    </body>
+</html>

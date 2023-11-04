@@ -1,0 +1,33 @@
+{
+    "name": "fixed-scroll",
+    "title": "fixed-scroll.js",
+    "description": "fixed-scroll.js is the only open source plugin for jQuery that allows you to fixedly position different sections of your layout for a specific time",
+    "keywords": [
+        "jQuery",
+        "jquery-plugin",
+        "scroll",
+        "fixed",
+        "animation"
+    ],
+    "version": "0.2.1",
+    "author": {
+        "name": "Carmine Rumma",
+        "url": "https://carminerumma.it"
+    },
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "https://github.com/carminerumma/fixed-scroll.js/blob/master/LICENSE"
+        }
+    ],
+    "bugs": "https://github.com/carminerumma/fixed-scroll.js/issues",
+    "homepage": "http://carminerumma.it/fixed-scroll",
+    "docs": "https://github.com/carminerumma/fixed-scroll.js",
+    "download": "https://github.com/carminerumma/fixed-scroll.js",
+    "demo": "http://carminerumma.it/fixed-scroll/demo.php",
+    "dependencies": {
+        "jquery": ">=1.5"
+    }
+}
+
+
