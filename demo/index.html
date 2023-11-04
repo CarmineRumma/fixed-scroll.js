@@ -62,8 +62,15 @@
 
     // Init fixedScroll
     $('[data-fixed-section]').fixedScroll({
-        callback: function(index, percentage) {
-            //console.log(index, percentage);
+        onEnter: function(index, $element){ 
+            console.log('Section enter', index); 
+        },
+        onExit: function(index, $element){ 
+            console.log('Section exit', index); 
+        },
+        onScroll: function(index, percentage, $element){ 
+            console.log('Section index', index, ' scroll progress: ', percentage); 
+            $element.find(".text > span").html("(" + (percentage > 0 ? percentage.toFixed(2) : 0) + "%)");
         }
     });
     </script>

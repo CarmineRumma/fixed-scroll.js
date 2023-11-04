@@ -49,14 +49,21 @@ Ex:
 
 ### TWEAKS
 
-fixedScroll.js was built with quick and simple customization in mind. You can easily add a callback to retrieve the nested scroll percentage
+fixedScroll.js was built with quick and simple customization in mind. You can easily add some callbacks to retrieve the nested scroll event and scroll percentage
 
 Ex:
 ```html
 <script type="text/javascript">
 	$('[data-fixed-section]').fixedScroll({
-        callback: function(index, percentage){ 
+        onEnter: function(index, $element){ 
+            console.log('Section enter', index); 
+        },
+        onExit: function(index, $element){ 
+            console.log('Section exit', index); 
+        },
+        onScroll: function(index, percentage, $element){ 
             console.log('Section index', index, ' scroll progress: ', percentage); 
+            $element.find(".text > span").html("(" + (percentage > 0 ? percentage.toFixed(2) : 0) + "%)");
         }
 	});
 </script>

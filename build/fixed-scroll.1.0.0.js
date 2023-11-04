@@ -22,7 +22,7 @@
         var sections = this;
         var winHeight = win.height();
         var animateTarget;
-        var _initialize;
+        var _initialize, _scroll;
         var sectionsCache = [];
         const sectionsClass = "fixed-scroll-section";
         const sectionsSelector = "." + sectionsClass;
@@ -67,7 +67,9 @@
         var minContainerHeight = 0;
         var settings = $.extend({
             useCSSFixed: true,
-            callback: null
+            onEnter: null,
+            onExit: null,
+            onScroll: null,
         }, options);
 
 
@@ -105,13 +107,15 @@
         // init
         _initialize = (function init(refresh) {
             var lastTop = 0;
-            if (sections.length > 0) {
-                $(sections).each( function (i, item) {
-                    const $this = $(this);
-                    $this.removeAttr('data-fixed-section');
-                    $this.addClass(sectionsClass);
-                });
-                $(sectionsSelector).wrapAll("<div class='"+wrapperIdentifier+"'></div>");
+            if (!refresh) {
+                if (sections.length > 0) {
+                    $(sections).each( function (i, item) {
+                        const $this = $(this);
+                        $this.removeAttr('data-fixed-section');
+                        $this.addClass(sectionsClass);
+                    });
+                    $(sectionsSelector).wrapAll("<div class='"+wrapperIdentifier+"'></div>");
+                }
             }
             if (refresh === true) {
                 sectionsCache = [];
@@ -126,9 +130,21 @@
                     handler: $(item),
                     offsetTop: ot, 
                     height: dh,
-                    callback: function() {
-                        if (typeof(settings.callback) == 'function') {
-                            settings.callback();
+                    entered: false,
+                    exited: true,
+                    onEnter: function(args) {
+                        if (typeof(settings.onEnter) == 'function') {
+                            settings.onEnter(args);
+                        }
+                    },
+                    onExit: function(args) {
+                        if (typeof(settings.onExit) == 'function') {
+                            settings.onExit(args);
+                        }
+                    },
+                    onScroll: function(args) {
+                        if (typeof(settings.onScroll) == 'function') {
+                            settings.onScroll(args);
                         }
                     }
                 });
@@ -152,9 +168,10 @@
                 sectionsCache[i].nOffsetTop = i > 0 ? sectionsCache[i-1].nOffsetTop + sectionsCache[i-1].height : 0;
                 lastRTop += sectionsCache[i].height
             });
-            log('sectionsCache', sectionsCache);
+            //log('sectionsCache', sectionsCache);
 
             var lastScrollTop = 0;
+            // scroll event listener
             $(win).on('scroll', function () {
                 const scrollTop = $(window).scrollTop(); 
                 const scrollDirection = scrollTop >= lastScrollTop ? "down" : "up";
@@ -182,6 +199,10 @@
                             percent = 100;
                             $handler.removeClass("fixed"); 
                             $innerHandler.addClass("go-down");
+                            if (!sectionsCache[i].exited) {
+                                settings.onExit(i, $handler);
+                                sectionsCache[i].exited = true;
+                            }
                             
                         } 
                         if (dy >= 0 && !settings.useCSSFixed) {
@@ -189,21 +210,31 @@
                         }
                         if (settings.useCSSFixed && percent > 0 && percent < 100) {
                             $handler.addClass("fixed"); 
+                            if (!sectionsCache[i].entered) {
+                                settings.onEnter(i, $handler);
+                                sectionsCache[i].entered = true;
+                            }
                             $innerHandler.removeClass("go-down");
                         } else {
                             $handler.removeClass("fixed");  
                             //scrollDirection === "down" ? $innerHandler.removeClass("go-down") : $innerHandler.addClass("go-down");
                         }
-                        settings.callback(i, percent);
+                        if (percent >= 0 && percent <= 100 && $handler.hasClass("fixed")) {
+                            settings.onScroll(i, percent, $handler);
+                        }
                     } else {
                         $innerHandler.css("transform", "translateY(0px)translateZ(0)");
                         $handler.removeClass("fixed"); 
+                        if (!sectionsCache[i].exited) {
+                            settings.onExit(i, $handler);
+                            sectionsCache[i].exited = true;
+                        }
                         //$innerHandler.addClass("go-down");
                     }
-                    $handler.isInViewport() ? $handler.removeClass(unvisibleClass) : $handler.addClass(unvisibleClass)
-                    $handler.find(".text > span").html("(" + (percent > 0 ? percent.toFixed(2) : 0) + "%)");
+                    $handler.isInViewport() ? $handler.removeClass(unvisibleClass) : $handler.addClass(unvisibleClass);
                 }
               });
+              $(win).trigger("scroll");
               return init;
         })();
 
