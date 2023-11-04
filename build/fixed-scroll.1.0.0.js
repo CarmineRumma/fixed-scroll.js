@@ -36,6 +36,10 @@
             position: relative;\
             overflow: hidden;\
         }\
+        "+sectionsSelector+".fixed {\
+            position: fixed!important;\
+            top: 0!important;\
+        }\
         ."+unvisibleClass+" {\
             visibility: hidden;\
         }\
@@ -51,6 +55,10 @@
             overflow: hidden;\
             transform: translate3d(0,0,0);\
         }\
+        ."+wrapperInnerIdentifier+".go-down{\
+            bottom: 0;\
+            top: auto;\
+        }\
         ."+wrapperIdentifier+".fixed > "+sectionsSelector+" {\
             position: absolute;\
         }\
@@ -58,6 +66,7 @@
         $(css.trim().replace(/\s\s+/g, ' ')).appendTo(head);
         var minContainerHeight = 0;
         var settings = $.extend({
+            useCSSFixed: true,
             callback: null
         }, options);
 
@@ -140,43 +149,59 @@
                     height: sectionsCache[i].height,
                     zIndex: (100 - i)
                 });
-                sectionsCache[i].nOffsetTop = i > 0 ? sectionsCache[i-1].height : 0;
+                sectionsCache[i].nOffsetTop = i > 0 ? sectionsCache[i-1].nOffsetTop + sectionsCache[i-1].height : 0;
                 lastRTop += sectionsCache[i].height
             });
-            //log('sectionsCache', sectionsCache);
+            log('sectionsCache', sectionsCache);
 
+            var lastScrollTop = 0;
             $(win).on('scroll', function () {
                 const scrollTop = $(window).scrollTop(); 
-                //log('scrollTop', scrollTop)
+                const scrollDirection = scrollTop >= lastScrollTop ? "down" : "up";
+                lastScrollTop = scrollTop;
                 const scrollZero = $('.' + wrapperIdentifier).offset().top;
-                if (scrollTop > sectionsCache[0].offsetTop) { 
+                if (scrollTop  > sectionsCache[0].offsetTop) { 
                     $('.' + wrapperIdentifier).addClass("fixed");
                 }
                 for (var i = 0; i < sectionsCache.length; i++) {
                     const nOt = sectionsCache[i].nOffsetTop;
                     var percent = 0;
-                    if (scrollTop + scrollZero >= sectionsCache[i].offsetTop) {
+                    const sign = scrollDirection === "up" ? -1 : 1;
+                    const $handler = sectionsCache[i].handler;
+                    const $innerHandler = $handler.find("." + wrapperInnerIdentifier);
+                    if (scrollTop + (scrollZero * sign) >= sectionsCache[i].offsetTop) {
                         
                         var dy = scrollTop - nOt - scrollZero;
                         const finalY = nOt + sectionsCache[i].height + scrollZero - winHeight;
-                        if (scrollTop >= nOt) {
+                        if (scrollTop + winHeight >= nOt) {
                             const loaded = sectionsCache[i].nOffsetTop + scrollZero;
                             percent = (scrollTop-loaded) * 100 / (sectionsCache[i].height-winHeight);
                         }
                         if (scrollTop >= finalY) {
                             dy = null;
                             percent = 100;
-                            sectionsCache[i].handler.find("." + wrapperInnerIdentifier).addClass("hid")
+                            $handler.removeClass("fixed"); 
+                            $innerHandler.addClass("go-down");
+                            
                         } 
-                        if (dy >= 0) {
-                            sectionsCache[i].handler.find("." + wrapperInnerIdentifier).css("transform", "translateY("+dy+"px)translateZ(0)");
+                        if (dy >= 0 && !settings.useCSSFixed) {
+                            $innerHandler.css("transform", "translateY("+dy+"px)translateZ(0)");
+                        }
+                        if (settings.useCSSFixed && percent > 0 && percent < 100) {
+                            $handler.addClass("fixed"); 
+                            $innerHandler.removeClass("go-down");
+                        } else {
+                            $handler.removeClass("fixed");  
+                            //scrollDirection === "down" ? $innerHandler.removeClass("go-down") : $innerHandler.addClass("go-down");
                         }
                         settings.callback(i, percent);
                     } else {
-                        sectionsCache[i].handler.find("." + wrapperInnerIdentifier).css("transform", "translateY(0px)translateZ(0)")
+                        $innerHandler.css("transform", "translateY(0px)translateZ(0)");
+                        $handler.removeClass("fixed"); 
+                        //$innerHandler.addClass("go-down");
                     }
-                    sectionsCache[i].handler.isInViewport() ? sectionsCache[i].handler.removeClass(unvisibleClass) : sectionsCache[i].handler.addClass(unvisibleClass)
-                    sectionsCache[i].handler.find(".text > span").html("(" + (percent > 0 ? percent.toFixed(2) : 0) + "%)");
+                    $handler.isInViewport() ? $handler.removeClass(unvisibleClass) : $handler.addClass(unvisibleClass)
+                    $handler.find(".text > span").html("(" + (percent > 0 ? percent.toFixed(2) : 0) + "%)");
                 }
               });
               return init;

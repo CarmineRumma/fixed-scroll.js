@@ -45,7 +45,13 @@
             <span>nan</span>
         </div>
     </div>
-    <div class="hero yellow">
+    <div class="yellow" data-fixed-section data-duration="6">
+        <div class="text">
+            Section 3
+            <span>nan</span>
+        </div>
+    </div>
+    <div class="hero red">
         <div class="text">
             Footer
         </div>
@@ -57,7 +63,7 @@
     // Init fixedScroll
     $('[data-fixed-section]').fixedScroll({
         callback: function(index, percentage) {
-            console.log(index, percentage);
+            //console.log(index, percentage);
         }
     });
     </script>
