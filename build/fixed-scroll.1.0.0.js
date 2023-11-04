@@ -66,6 +66,7 @@
         $(css.trim().replace(/\s\s+/g, ' ')).appendTo(head);
         var minContainerHeight = 0;
         var settings = $.extend({
+            debug: false,
             useCSSFixed: true,
             onEnter: null,
             onExit: null,
@@ -74,7 +75,9 @@
 
 
         function log(message, args){
-            console.log(message, args);
+            if (settings.debug) {
+                console.log(message, args);
+            }
         }
 
         // Recalculate var
@@ -168,7 +171,7 @@
                 sectionsCache[i].nOffsetTop = i > 0 ? sectionsCache[i-1].nOffsetTop + sectionsCache[i-1].height : 0;
                 lastRTop += sectionsCache[i].height
             });
-            //log('sectionsCache', sectionsCache);
+            log('sectionsCache', sectionsCache);
 
             var lastScrollTop = 0;
             // scroll event listener
@@ -183,9 +186,10 @@
                 for (var i = 0; i < sectionsCache.length; i++) {
                     const nOt = sectionsCache[i].nOffsetTop;
                     var percent = 0;
-                    const sign = scrollDirection === "up" ? -1 : 1;
+                    const sign = 1; //scrollDirection === "up" ? -1 : 1;
                     const $handler = sectionsCache[i].handler;
                     const $innerHandler = $handler.find("." + wrapperInnerIdentifier);
+                    log(scrollTop + (scrollZero * sign), sectionsCache[i].offsetTop);
                     if (scrollTop + (scrollZero * sign) >= sectionsCache[i].offsetTop) {
                         
                         var dy = scrollTop - nOt - scrollZero;
